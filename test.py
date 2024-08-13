@@ -39,6 +39,12 @@ def replace_form_content(html_content, new_form_snippet, redirect_url, output_fo
     # Replace the placeholder comment with the redirect URL in the new form snippet
     modified_snippet = new_form_snippet.replace('// Add code to deliver asset here', f'window.location.replace("https://{redirect_url}");')
     soup = BeautifulSoup(html_content, 'html.parser')  # Parse the HTML content
+    
+    # Remove the element with id="form-subheading"
+    form_subheading_tag = soup.find(id="form-subheading")
+    if form_subheading_tag:
+        form_subheading_tag.decompose()  # Remove the tag entirely from the HTML
+    
     replace_image_paths(soup, output_folder, base_url)  # Replace image paths and download images
     form_tag = soup.find('form')  # Find the <form> tag
 
