@@ -21,25 +21,6 @@ def fetch_webpage(url):
     response = requests.get(url)
     return response.content
 
-# Function to download an image from a URL and save it in the specified folder
-def download_image(image_url, output_folder):
-    response = requests.get(image_url)
-    image_name = os.path.basename(urlparse(image_url).path)
-    image_path = os.path.join(output_folder, image_name)
-
-    with open(image_path, 'wb') as file:
-        file.write(response.content)
-
-    return image_name
-
-# Function to replace the image paths in the HTML content and download the images locally
-def replace_image_paths(soup, output_folder, base_url):
-    for img_tag in soup.find_all('img'):
-        img_url = img_tag['src']
-        full_img_url = urljoin(base_url, img_url)
-        image_name = download_image(full_img_url, output_folder)
-        img_tag['src'] = os.path.join('images', image_name)
-
 # Function to replace the content inside the <form> tag with a new form snippet
 def replace_form_content(html_content, new_form_snippet, redirect_url, output_folder, base_url):
     modified_snippet = new_form_snippet.replace('// Add code to deliver asset here', f'window.location.replace("https://{redirect_url}");')
@@ -49,7 +30,7 @@ def replace_form_content(html_content, new_form_snippet, redirect_url, output_fo
     if form_subheading_tag:
         form_subheading_tag.decompose()
     
-    replace_image_paths(soup, output_folder, base_url)
+    # replace_image_paths(soup, output_folder, base_url)
     form_tag = soup.find('form')
 
     if form_tag:
@@ -101,7 +82,7 @@ def process_excel(file_path):
             
             if modified_html:
                 file_name = generate_filename_from_url(url)
-                html_path = os.path.join(folder_name, f'{file_name}.html')
+                html_path = os.path.join(folder_name, f'{file_name}')
                 
                 zip_file.writestr(html_path, modified_html)
             else:
