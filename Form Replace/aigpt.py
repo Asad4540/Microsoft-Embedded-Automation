@@ -62,13 +62,11 @@ def generate_filename_from_url(url):
     parsed_url = urlparse(url)
     path_parts = parsed_url.path.strip('/').split('/')
     
-    if len(path_parts) >= 3:
-        last_three = path_parts[-3:]
+    # Return only the last part of the URL path as the filename
+    if path_parts:
+        return path_parts[-1]
     else:
-        last_three = path_parts
-    
-    filename = "-".join(last_three)
-    return filename
+        return 'default_filename.html'  # Fallback if no valid filename can be extracted
 
 # Function to process the Excel file and create a zip of modified HTMLs
 def process_excel(file_path):
