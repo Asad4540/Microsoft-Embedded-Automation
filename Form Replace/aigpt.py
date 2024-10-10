@@ -26,6 +26,11 @@ def replace_form_content(html_content, new_form_snippet, redirect_url, output_fo
     modified_snippet = new_form_snippet.replace('// Add code to deliver asset here', f'window.location.replace("https://{redirect_url}");')
     soup = BeautifulSoup(html_content, 'html.parser')
     
+    # Find and update all tags with data-isembedded="false"
+    for tag in soup.find_all(attrs={"data-isembedded": "false"}):
+        tag['data-isembedded'] = "true"  # Update the attribute to "true"
+    
+    # Remove the element with id="form-subheading"
     form_subheading_tag = soup.find(id="form-subheading")
     if form_subheading_tag:
         form_subheading_tag.decompose()
@@ -40,14 +45,17 @@ def replace_form_content(html_content, new_form_snippet, redirect_url, output_fo
     else:
         return None
 
-# Function to generate a folder name from the URL based on the first part after the domain
+# Function to generate folder structure based on the URL path
 def generate_folder_name_from_url(url):
     parsed_url = urlparse(url)
     path_parts = parsed_url.path.strip('/').split('/')
-    if path_parts:
-        return path_parts[0]
+    
+    if len(path_parts) > 1:
+        # Generate the folder structure up to the second last part (excluding the last part, which is the file)
+        folder_structure = os.path.join(*path_parts[:-1])
+        return folder_structure
     else:
-        return 'default_folder'
+        return 'default_folder'  # Fallback if no valid folder name can be extracted
 
 # Function to generate a filename based on the last three parts of the URL path
 def generate_filename_from_url(url):
@@ -74,22 +82,26 @@ def process_excel(file_path):
             redirect_url = row['Redirect URL']
             html_content = fetch_webpage(url)
             
-            folder_name = generate_folder_name_from_url(url)
-            images_folder = os.path.join(folder_name, 'images')
-            os.makedirs(images_folder, exist_ok=True)
+            # Generate the folder structure based on the URL
+            folder_structure = generate_folder_name_from_url(url)
+            images_folder = os.path.join(folder_structure, 'images')  # Subfolder for images
             
+            os.makedirs(images_folder, exist_ok=True)  # Create the entire folder structure
+            
+            # Modify the HTML content
             modified_html = replace_form_content(html_content, new_form_snippet, redirect_url, images_folder, url)
             
             if modified_html:
                 file_name = generate_filename_from_url(url)
-                html_path = os.path.join(folder_name, f'{file_name}')
+                html_path = os.path.join(folder_structure, f'{file_name}')
                 
-                zip_file.writestr(html_path, modified_html)
+                zip_file.writestr(html_path, modified_html)  # Add to zip file
             else:
                 continue
 
     zip_buffer.seek(0)
     return zip_buffer
+
 
 @app.route('/')
 def index():
