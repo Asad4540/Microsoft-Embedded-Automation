@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Collator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        input[type="file"] {
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h2>Upload Excel Files to Collate</h2>
+    <form id="upload-form">
+        <input type="file" id="excel-files" name="files" accept=".xlsx" multiple required>
+        <br>
+        <button type="submit" id="upload-btn">Upload & Collate</button>
+    </form>
+
+    <br>
+    <div id="download-link"></div>
+
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const filesInput = document.getElementById('excel-files');
+            const files = filesInput.files;
+
+            if (files.length === 0) {
+                alert("Please upload at least one Excel file.");
+                return;
+            }
+
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+
+            const uploadButton = document.getElementById('upload-btn');
+            uploadButton.disabled = true;
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const downloadLink = `<a href="${data.file_url}" download>Download Collated Excel File</a>`;
+                    document.getElementById('download-link').innerHTML = downloadLink;
+                } else {
+                    alert("Error processing files. Please try again.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An error occurred. Please try again.");
+            } finally {
+                uploadButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
