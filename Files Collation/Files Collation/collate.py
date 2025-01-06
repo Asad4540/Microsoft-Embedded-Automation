@@ -22,7 +22,7 @@ for file in os.listdir(folder_path):
         required_columns = [
             "Asset Title / Ad Name", 
             "Vereigen Links", 
-            "Snippets 8/27", 
+            "Snippets", 
             "Ungated PDFs of the localized eBooks/reports (include local links for all markets)"
         ]
         

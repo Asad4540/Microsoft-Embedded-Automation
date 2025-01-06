@@ -2,11 +2,12 @@ import os
 from flask import Flask, request, jsonify, send_file, render_template
 import pandas as pd
 from werkzeug.utils import secure_filename
-
+from flask_cors import CORS
 app = Flask(__name__)
 
 UPLOAD_FOLDER = 'uploads'
 COLLATED_FILE = 'collated_data.xlsx'
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})  # Allow your client origin
 
 # Create the uploads folder if it doesn't exist
 if not os.path.exists(UPLOAD_FOLDER):
@@ -29,7 +30,7 @@ def upload_files():
     required_columns = [
         "Asset Title / Ad Name", 
         "Vereigen Links", 
-        "Snippets 8/27", 
+        "Snippets", 
         "Ungated PDFs of the localized eBooks/reports (include local links for all markets)"
     ]
 
